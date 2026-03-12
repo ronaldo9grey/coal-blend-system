@@ -26,6 +26,8 @@ class PlantConfig(BaseModel):
         "fly_ash_combustible": 1.21,    # 飞灰可燃物 %
         "slag_combustible": 1.0,       # 炉渣可燃物 %
         "heat_loss": 0.586257,        # 散热损失 %
+        "turbine_heat_rate": 7715,    # 汽机热耗 kJ/kWh
+        "pipe_efficiency": 0.99,      # 管道效率
     }
     
     byproduct_params: dict = {

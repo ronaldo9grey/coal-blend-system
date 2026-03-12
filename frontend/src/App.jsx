@@ -5,10 +5,15 @@ import CoalManager from './CoalManager';
 import HistoryPanel from './HistoryPanel';
 import CalculationRules from './CalculationRules';
 import CalculationProcess from './CalculationProcess';
+import PlantManager from './PlantManager';
 import { optimizeBlend, getCoals, saveResult } from './api';
+
+const API_BASE = 'http://localhost:8000';
 
 function App() {
   const [coals, setCoals] = useState([]);
+  const [plants, setPlants] = useState([]);
+  const [selectedPlant, setSelectedPlant] = useState(null);
   const [config, setConfig] = useState({
     targetPower: 38174,
     selectedCoals: [],
@@ -21,7 +26,18 @@ function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [showProcess, setShowProcess] = useState(false);
+  const [showPlantManager, setShowPlantManager] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const loadPlants = async () => {
+    const res = await fetch(`${API_BASE}/plants`);
+    const data = await res.json();
+    setPlants(data);
+    if (data.length > 0 && !selectedPlant) {
+      const defaultPlant = data.find(p => p.is_default) || data[0];
+      setSelectedPlant(defaultPlant);
+    }
+  };
 
   const loadCoals = async () => {
     const data = await getCoals();
@@ -34,6 +50,7 @@ function App() {
   };
 
   useEffect(() => {
+    loadPlants();
     loadCoals();
   }, []);
 
@@ -54,6 +71,8 @@ function App() {
     setSaving(true);
     try {
       await saveResult({
+        plant_id: selectedPlant?.id,
+        plant_name: selectedPlant?.name,
         target_power: config.targetPower,
         total_amount: result.total_amount,
         total_cost: result.total_cost,
@@ -144,6 +163,12 @@ function App() {
               <div className="h-0.5 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-full mt-1" />
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={() => setShowPlantManager(true)}
+                className="px-3 py-1.5 bg-white/60 backdrop-blur-sm rounded-lg text-gray-600 hover:bg-white/80 transition-all border border-white/50 text-sm flex items-center gap-1"
+              >
+                <span>🏭</span> {selectedPlant?.name || '选择电厂'}
+              </button>
               <button
                 onClick={() => setShowCoalManager(true)}
                 className="px-3 py-1.5 bg-white/60 backdrop-blur-sm rounded-lg text-gray-600 hover:bg-white/80 transition-all border border-white/50 text-sm flex items-center gap-1"
@@ -325,7 +350,7 @@ function App() {
               
               {result ? (
                 <div className="space-y-4">
-                  <ResultPanel result={result} />
+                  <ResultPanel result={result} plantName={selectedPlant?.name} />
                   
                   {result.status === 'optimal' && (
                     <button
@@ -380,6 +405,16 @@ function App() {
 
       {showRules && (
         <CalculationRules onClose={() => setShowRules(false)} />
+      )}
+
+      {showPlantManager && (
+        <PlantManager 
+          onClose={() => setShowPlantManager(false)} 
+          onSelectPlant={(plant) => {
+            setSelectedPlant(plant);
+            setShowPlantManager(false);
+          }}
+        />
       )}
     </div>
   );

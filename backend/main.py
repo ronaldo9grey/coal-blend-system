@@ -86,6 +86,34 @@ async def delete_history(history_id: int):
     db.delete_history(history_id)
     return {"status": "deleted"}
 
+@app.get("/plants")
+async def get_plants():
+    plants = db.get_all_plants()
+    return plants
+
+@app.get("/plants/{plant_id}")
+async def get_plant(plant_id: int):
+    plant = db.get_plant_by_id(plant_id)
+    if not plant:
+        raise HTTPException(status_code=404, detail="电厂不存在")
+    return plant
+
+@app.post("/plants")
+async def create_plant(plant: dict):
+    return db.create_plant(plant)
+
+@app.put("/plants/{plant_id}")
+async def update_plant(plant_id: int, plant: dict):
+    result = db.update_plant(plant_id, plant)
+    if not result:
+        raise HTTPException(status_code=404, detail="电厂不存在")
+    return result
+
+@app.delete("/plants/{plant_id}")
+async def delete_plant(plant_id: int):
+    db.delete_plant(plant_id)
+    return {"status": "deleted"}
+
 @app.get("/config")
 async def get_config():
     return {

@@ -105,7 +105,17 @@ class CoalBlendSolver:
             low_heat_coal = pulp.lpSum([x[c.id] for c in coals if c.qualifies_for_refund])
             refund = low_heat_coal * 6.69
         
-        prob += (revenue - coal_cost + refund)
+        profit = revenue - coal_cost + refund
+        
+        if request.priority == 'profit':
+            prob += profit
+            relaxer.log("优化目标: 利润最大化")
+        elif request.priority == 'eco':
+            prob += profit - weighted_sulfur * 5000
+            relaxer.log("优化目标: 环保优先 (利润 - 硫分惩罚)")
+        else:
+            prob += profit + weighted_heat * 0.1
+            relaxer.log("优化目标: 均衡方案 (利润 + 热值奖励)")
         
         try:
             prob.solve(pulp.PULP_CBC_CMD(msg=0, timeLimit=30))
@@ -130,6 +140,10 @@ class CoalBlendSolver:
             if amt > 0.001:
                 components.append(BlendComponent(
                     coal_id=c.id, name=c.name,
+                    heat_value=c.heat_value,
+                    sulfur=c.sulfur,
+                    ash=c.ash,
+                    price=c.price,
                     amount=round(amt, 4),
                     percentage=round(amt/total_val*100, 2),
                     cost=round(amt * c.price, 2),
@@ -218,10 +232,12 @@ class CoalBlendSolver:
     
     def _calculate_coal_consumption(self, heat_value: float, efficiency: float) -> float:
         if efficiency <= 0 or heat_value <= 0:
-            return 350
-        standard_coal_heat = 7000
-        heat_rate = standard_coal_heat / (efficiency / 100) * (standard_coal_heat / heat_value)
-        coal_rate = 29307.6 / (efficiency / 100) / 29.3076
+            return 300
+        bp = self.config.boiler_params
+        turbine_heat_rate = bp.get("turbine_heat_rate", 7715)
+        pipe_eff = bp.get("pipe_efficiency", 0.99)
+        standard_coal_heat_kj = 29307.6
+        coal_rate = turbine_heat_rate / (efficiency / 100 * pipe_eff) / standard_coal_heat_kj * 1000
         return min(400, max(280, coal_rate))
     
     def _calculate_byproducts(self, total_coal: float, ash: float, sulfur: float, 
@@ -261,17 +277,20 @@ class CoalBlendSolver:
         return ByproductResult(
             ash_amount=round(ash_amount, 4),
             ash_sales=round(ash_sales, 4),
-            ash_revenue=round(ash_revenue, 2),
+            ash_revenue=round(ash_revenue, 4),
             slag_amount=round(slag_amount, 4),
             slag_sales=round(slag_sales, 4),
-            slag_revenue=round(slag_revenue, 2),
+            slag_revenue=round(slag_revenue, 4),
             gypsum_amount=round(gypsum_amount, 4),
             gypsum_sales=round(gypsum_sales, 4),
-            gypsum_revenue=round(gypsum_revenue, 2),
-            limestone_cost=round(limestone_cost, 2),
-            urea_cost=round(urea_cost, 2),
-            transport_cost=round(total_transport, 2),
-            total_byproduct_revenue=round(total_revenue, 2)
+            gypsum_revenue=round(gypsum_revenue, 4),
+            limestone_cost=round(limestone_cost, 4),
+            urea_cost=round(urea_cost, 4),
+            ash_transport=round(ash_transport, 4),
+            slag_transport=round(slag_transport, 4),
+            gypsum_transport=round(gypsum_transport, 4),
+            total_transport=round(total_transport, 4),
+            total_byproduct_revenue=round(total_revenue, 4)
         )
     
     def _error_result(self, msg: str) -> OptimizationResult:

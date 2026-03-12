@@ -24,6 +24,10 @@ class ConstraintType(str, Enum):
 class BlendComponent(BaseModel):
     coal_id: int
     name: str
+    heat_value: float = 0
+    sulfur: float = 0
+    ash: float = 0
+    price: float = 0
     amount: float              # 万吨
     percentage: float          # %
     cost: float                # 万元

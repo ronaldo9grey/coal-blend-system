@@ -30,7 +30,7 @@ const ConfigPanel = ({ config, onChange }) => {
           </div>
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">优化目标</label>
+          <label className="block text-xs text-gray-500 mb-1">配煤目标</label>
           <select
             value={config.priority}
             onChange={(e) => onChange({ ...config, priority: e.target.value })}

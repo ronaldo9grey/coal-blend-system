@@ -15,12 +15,42 @@ function CalculationRules({ onClose }) {
           <section className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-5 border border-cyan-100">
             <h3 className="font-semibold text-cyan-700 mb-3 flex items-center gap-2">
               <span className="w-8 h-8 rounded-lg bg-cyan-500 text-white flex items-center justify-center text-sm">1</span>
-              优化目标
+              配煤目标
             </h3>
-            <div className="text-gray-600 leading-relaxed">
-              <p className="mb-2"><strong>目标函数：</strong>最大化利润</p>
-              <div className="bg-white/60 rounded-lg p-3 font-mono text-sm">
-                <p className="text-cyan-700">利润 = 发电收入 - 煤炭成本 + 退税收益 + 副产物净收益</p>
+            <div className="space-y-3">
+              <div className="bg-white/60 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-700">💰 利润最大</span>
+                  <span className="text-xs text-green-500">默认推荐</span>
+                </div>
+                <p className="text-sm text-gray-600">目标函数: 最大化利润</p>
+                <div className="bg-gray-50 rounded p-2 mt-2 font-mono text-xs">
+                  目标 = 利润 = 发电收入 - 煤炭成本 + 退税收益 + 副产物净收益
+                </div>
+              </div>
+              
+              <div className="bg-white/60 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-700">🌿 环保优先</span>
+                  <span className="text-xs text-blue-500">降低排放</span>
+                </div>
+                <p className="text-sm text-gray-600">目标函数: 利润 - 硫分惩罚</p>
+                <div className="bg-gray-50 rounded p-2 mt-2 font-mono text-xs">
+                  目标 = 利润 - 加权硫分 × 5000
+                </div>
+                <p className="text-xs text-gray-500 mt-1">大幅惩罚高硫煤，优先选择低硫煤种</p>
+              </div>
+              
+              <div className="bg-white/60 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-700">⚖️ 均衡方案</span>
+                  <span className="text-xs text-purple-500">质量优先</span>
+                </div>
+                <p className="text-sm text-gray-600">目标函数: 利润 + 热值奖励</p>
+                <div className="bg-gray-50 rounded p-2 mt-2 font-mono text-xs">
+                  目标 = 利润 + 加权热值 × 0.1
+                </div>
+                <p className="text-xs text-gray-500 mt-1">奖励高热值煤，提升煤质质量</p>
               </div>
             </div>
           </section>

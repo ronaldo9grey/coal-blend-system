@@ -12,6 +12,13 @@ function CalculationProcess({ result, config, onClose }) {
 
   const revenue = result.profit + result.total_cost - result.tax_refund - (byproducts.total_byproduct_revenue || 0);
   const targetPower = config?.targetPower || 38174;
+  const priority = config?.priority || 'profit';
+  
+  const priorityConfig = {
+    profit: { name: '利润最大化', formula: '目标 = 利润', desc: '直接最大化利润' },
+    eco: { name: '环保优先', formula: '目标 = 利润 - 加权硫分 × 5000', desc: '大幅惩罚高硫煤，降低排放' },
+    balanced: { name: '均衡方案', formula: '目标 = 利润 + 加权热值 × 0.1', desc: '奖励高热值煤，提升煤质' }
+  };
 
   const steps = [
     {
@@ -22,7 +29,7 @@ function CalculationProcess({ result, config, onClose }) {
         { label: '目标发电量', value: `${targetPower} 万度` },
         { label: '选择煤种数量', value: `${components.length} 种` },
         { label: '退税模式', value: config?.enableRefund ? '✅ 启用' : '❌ 禁用', highlight: config?.enableRefund },
-        { label: '优化目标', value: config?.priority === 'profit' ? '利润最大化' : '其他' }
+        { label: '配煤目标', value: priorityConfig[priority].name }
       ]
     },
     {
@@ -33,8 +40,8 @@ function CalculationProcess({ result, config, onClose }) {
         { 
           label: '退税约束', 
           formula: '低热值煤占比 ≥ 60%',
-          calculation: `实际占比 = ${(result.low_heat_ratio * 100).toFixed(1)}% ${result.low_heat_ratio >= 0.6 ? '✅ 达标' : '⚠️ 未达标'}`,
-          value: `${(result.low_heat_ratio * 100).toFixed(1)}%`,
+          calculation: `实际占比 = ${(result.low_heat_ratio * 100).toFixed(2)}% ${result.low_heat_ratio >= 0.6 ? '✅ 达标' : '⚠️ 未达标'}`,
+          value: `${(result.low_heat_ratio * 100).toFixed(2)}%`,
           status: result.low_heat_ratio >= 0.6 ? 'strict' : 'violated'
         },
         { 
@@ -62,7 +69,7 @@ function CalculationProcess({ result, config, onClose }) {
         { label: '总煤量', value: `${totalAmount.toFixed(2)} 万吨`, highlight: true },
         ...components.map(c => ({
           label: `└ ${c.name}`,
-          value: `${c.amount.toFixed(2)} 万吨 (${c.percentage.toFixed(1)}%)`,
+          value: `${c.amount.toFixed(2)} 万吨 (${c.percentage.toFixed(2)}%)`,
           sub: true
         }))
       ]
@@ -87,8 +94,8 @@ function CalculationProcess({ result, config, onClose }) {
         { 
           label: '加权灰分', 
           formula: '加权灰分 = Σ(煤种用量 × 灰分) ÷ 总煤量',
-          calculation: `加权灰分计算结果 = ${weightedAsh.toFixed(1)}%`,
-          value: `${weightedAsh.toFixed(1)}%`
+          calculation: `加权灰分计算结果 = ${weightedAsh.toFixed(2)}%`,
+          value: `${weightedAsh.toFixed(2)}%`
         }
       ]
     },
@@ -97,10 +104,10 @@ function CalculationProcess({ result, config, onClose }) {
       icon: '🔥',
       color: 'from-red-500 to-rose-500',
       formula: '锅炉效率 = 100% - Q2(排烟) - Q3(化学) - Q4(机械) - Q5(散热) - Q6(灰渣)',
-      calculation: `100% - 0.9% - 0.1% - 0.5% - 0.586% - 0.5% = ${boiler.efficiency?.toFixed(1) || 88}%`,
+      calculation: `100% - 0.9% - 0.1% - 0.5% - 0.586% - 0.5% = ${boiler.efficiency?.toFixed(2) || 88}%`,
       items: [
-        { label: '锅炉效率', value: `${boiler.efficiency?.toFixed(1) || 88}%`, highlight: true },
-        { label: '发电标煤耗', value: `${boiler.coal_consumption?.toFixed(0) || 310} g/kWh` }
+        { label: '锅炉效率', value: `${boiler.efficiency?.toFixed(2) || 88}%`, highlight: true },
+        { label: '发电标煤耗', value: `${boiler.coal_consumption?.toFixed(2) || 310} g/kWh` }
       ]
     },
     {
@@ -111,13 +118,13 @@ function CalculationProcess({ result, config, onClose }) {
         { 
           label: '炉灰产量', 
           formula: '炉灰产量 = 总煤量 × 灰分% × 飞灰占比(90%)',
-          calculation: `${totalAmount.toFixed(2)} × ${weightedAsh.toFixed(1)}% × 90% = ${byproducts.ash_amount?.toFixed(3) || 0} 万吨`,
+          calculation: `${totalAmount.toFixed(2)} × ${weightedAsh.toFixed(2)}% × 90% = ${byproducts.ash_amount?.toFixed(3) || 0} 万吨`,
           value: `${byproducts.ash_amount?.toFixed(3) || 0} 万吨`
         },
         { 
           label: '炉渣产量', 
           formula: '炉渣产量 = 总煤量 × 灰分% × 炉渣占比(10%)',
-          calculation: `${totalAmount.toFixed(2)} × ${weightedAsh.toFixed(1)}% × 10% = ${byproducts.slag_amount?.toFixed(3) || 0} 万吨`,
+          calculation: `${totalAmount.toFixed(2)} × ${weightedAsh.toFixed(2)}% × 10% = ${byproducts.slag_amount?.toFixed(3) || 0} 万吨`,
           value: `${byproducts.slag_amount?.toFixed(3) || 0} 万吨`
         },
         { 
@@ -139,8 +146,15 @@ function CalculationProcess({ result, config, onClose }) {
       title: '第七步：利润计算',
       icon: '💰',
       color: 'from-green-500 to-emerald-500',
-      formula: '利润 = 发电收入 - 煤炭成本 + 退税收益 + 副产物净收益',
+      formula: `配煤目标: ${priorityConfig[priority].formula}`,
       items: [
+        { 
+          label: '配煤目标说明', 
+          formula: priorityConfig[priority].formula,
+          calculation: priorityConfig[priority].desc,
+          value: priorityConfig[priority].name,
+          highlight: true
+        },
         { 
           label: '发电收入', 
           formula: '发电收入 = 发电量 × (1-厂用电率) × 电价 ÷ (1+增值税率)',
@@ -151,9 +165,9 @@ function CalculationProcess({ result, config, onClose }) {
           label: '煤炭成本', 
           formula: '煤炭成本 = Σ(煤种用量 × 单价)',
           calculation: components.length > 0 
-            ? `${components.map(c => `${c.amount.toFixed(2)}×${c.price}`).join(' + ')} = ${result.total_cost.toFixed(0)} 万元`
-            : `各煤种成本合计 = ${result.total_cost.toFixed(0)} 万元`,
-          value: `- ${result.total_cost.toFixed(0)} 万元`,
+            ? `${components.filter(c => c.amount > 0).map(c => `${c.amount.toFixed(2)}×${c.price || 0}`).join(' + ')} = ${result.total_cost.toFixed(2)} 万元`
+            : `各煤种成本合计 = ${result.total_cost.toFixed(2)} 万元`,
+          value: `- ${result.total_cost.toFixed(2)} 万元`,
           negative: true
         },
         { 
@@ -167,9 +181,9 @@ function CalculationProcess({ result, config, onClose }) {
         },
         { 
           label: '副产物净收益', 
-          formula: '副产物净收益 = 炉灰+炉渣+石膏收益 - 脱硫成本 - 倒运费',
-          calculation: `副产物净收益 = ${byproducts.total_byproduct_revenue?.toFixed(2) || 0} 万元`,
-          value: `${byproducts.total_byproduct_revenue >= 0 ? '+' : ''} ${byproducts.total_byproduct_revenue?.toFixed(2) || 0} 万元`,
+          formula: '副产物净收益 = 炉灰收益 + 炉渣收益 + 石膏收益 - 脱硫成本 - 倒运费',
+          calculation: `${byproducts.ash_revenue?.toFixed(4) || 0} + ${byproducts.slag_revenue?.toFixed(4) || 0} + ${byproducts.gypsum_revenue?.toFixed(4) || 0} - ${byproducts.limestone_cost?.toFixed(4) || 0} - ${byproducts.urea_cost?.toFixed(4) || 0} - ${byproducts.total_transport?.toFixed(4) || 0} = ${byproducts.total_byproduct_revenue?.toFixed(4) || 0} 万元`,
+          value: `${byproducts.total_byproduct_revenue >= 0 ? '+' : ''} ${byproducts.total_byproduct_revenue?.toFixed(4) || 0} 万元`,
           positive: byproducts.total_byproduct_revenue >= 0,
           negative: byproducts.total_byproduct_revenue < 0
         },

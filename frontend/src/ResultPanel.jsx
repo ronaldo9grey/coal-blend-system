@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ResultPanel = ({ result }) => {
+const ResultPanel = ({ result, plantName }) => {
   if (!result) return null;
   
   const statusConfig = {
@@ -14,10 +14,12 @@ const ResultPanel = ({ result }) => {
   const boiler = result.boiler || {};
   const byproducts = result.byproducts || {};
 
-  const formatNumber = (num, decimals = 1) => {
+  const formatNumber = (num, decimals = 2) => {
     if (num === null || num === undefined) return '--';
     return Number(num).toFixed(decimals);
   };
+
+  const displayName = plantName || '配煤方案';
 
   return (
     <div className="space-y-6">
@@ -27,7 +29,7 @@ const ResultPanel = ({ result }) => {
             {status.icon}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-800">优化结果</h2>
+            <h2 className="text-xl font-bold text-gray-800">{displayName}</h2>
             <p className="text-sm text-gray-500">
               {result.status === 'optimal' ? '已找到最优配煤方案' : 
                result.status === 'relaxed' ? '约束已松弛求解' : '无可行解'}
@@ -103,7 +105,7 @@ const ResultPanel = ({ result }) => {
           </div>
           <div className="mt-2">
             <span className="text-3xl font-bold text-orange-600">
-              {formatNumber(boiler.coal_consumption, 0)}
+              {formatNumber(boiler.coal_consumption, 2)}
             </span>
             <span className="text-sm text-orange-500">g/kWh</span>
           </div>

@@ -65,12 +65,15 @@ function HistoryPanel({ onClose, onLoadResult }) {
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-semibold text-gray-800">
-                        ¥{item.profit?.toFixed(0)}万
+                        ¥{item.profit?.toFixed(2)}万
                       </span>
                       <span className="text-xs text-gray-400">{formatDate(item.created_at)}</span>
                     </div>
                     <div className="text-sm text-gray-500">
-                      发电{item.target_power?.toFixed(0)}万度 · {item.total_amount?.toFixed(1)}万吨
+                      {item.plant_name && <span className="text-purple-600">{item.plant_name}</span>}
+                      {!item.plant_name && <span>发电{item.target_power?.toFixed(2)}万度</span>}
+                      <span className="mx-1">·</span>
+                      {item.total_amount?.toFixed(2)}万吨
                     </div>
                   </div>
                 ))
@@ -94,19 +97,19 @@ function HistoryPanel({ onClose, onLoadResult }) {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-3">
                     <div className="text-xs text-emerald-600">利润</div>
-                    <div className="text-xl font-bold text-emerald-600">{selected.profit?.toFixed(0)}万</div>
+                    <div className="text-xl font-bold text-emerald-600">{selected.profit?.toFixed(2)}万</div>
                   </div>
                   <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-3">
                     <div className="text-xs text-blue-600">退税</div>
-                    <div className="text-xl font-bold text-blue-600">{selected.tax_refund?.toFixed(0)}万</div>
+                    <div className="text-xl font-bold text-blue-600">{selected.tax_refund?.toFixed(2)}万</div>
                   </div>
                   <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3">
                     <div className="text-xs text-purple-600">锅炉效率</div>
-                    <div className="text-xl font-bold text-purple-600">{selected.boiler_efficiency?.toFixed(1)}%</div>
+                    <div className="text-xl font-bold text-purple-600">{selected.boiler_efficiency?.toFixed(2)}%</div>
                   </div>
                   <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-3">
                     <div className="text-xs text-orange-600">标煤耗</div>
-                    <div className="text-xl font-bold text-orange-600">{selected.coal_consumption?.toFixed(0)}</div>
+                    <div className="text-xl font-bold text-orange-600">{selected.coal_consumption?.toFixed(2)}</div>
                   </div>
                 </div>
 
@@ -140,7 +143,7 @@ function HistoryPanel({ onClose, onLoadResult }) {
                   </div>
                   <div className="bg-gray-50 rounded-lg p-2">
                     <div className="text-gray-500">低热值占比</div>
-                    <div className="font-semibold text-gray-700">{(selected.low_heat_ratio * 100)?.toFixed(1)}%</div>
+                    <div className="font-semibold text-gray-700">{(selected.low_heat_ratio * 100)?.toFixed(2)}%</div>
                   </div>
                 </div>
 
