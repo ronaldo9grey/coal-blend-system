@@ -3,22 +3,22 @@ from typing import List
 
 COAL_DATABASE = {
     1: CoalType(
-        id=1, name="东怀", heat_value=2376.38, sulfur=1.5393,
+        id=1, name="低热值煤1", heat_value=2376.38, sulfur=1.5393,
         ash=53.75, price=299.10, max_available=16.55,
         moisture=9.05, volatile=20.24, qualifies_for_refund=True
     ),
     2: CoalType(
-        id=2, name="跃进", heat_value=1731.53, sulfur=0.4161,
+        id=2, name="低热值煤2", heat_value=1731.53, sulfur=0.4161,
         ash=59.61, price=214.88, max_available=10.30,
         moisture=9.9, volatile=16.80, qualifies_for_refund=True
     ),
     3: CoalType(
-        id=3, name="州景", heat_value=0, sulfur=0.63,
+        id=3, name="高热值煤1", heat_value=0, sulfur=0.63,
         ash=65.22, price=0, max_available=0,
         moisture=15.68, volatile=58.6, qualifies_for_refund=False
     ),
     4: CoalType(
-        id=4, name="那荷", heat_value=0, sulfur=0.34,
+        id=4, name="高热值煤2", heat_value=0, sulfur=0.34,
         ash=71.46, price=0, max_available=0,
         moisture=8.93, volatile=56.85, qualifies_for_refund=False
     ),

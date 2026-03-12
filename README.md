@@ -1,23 +1,25 @@
-# 智能配煤优化系统
+# Intelligent Coal Blending Optimization System
 
-基于线性规划的配煤优化系统，支持退税约束、副产物收益计算、历史记录管理。
+A coal blending optimization system based on linear programming, supporting tax refund constraints, by-product revenue calculation, and historical record management.
 
-## 功能特点
+## Features
 
-- **完整利润计算模型**：发电收入、煤炭成本、退税收益、副产物收益
-- **约束条件**：退税约束（低热值煤≥60%）、环保约束（入炉硫量≤4.03t/h）、热值范围
-- **煤种管理**：支持添加、编辑、删除煤种
-- **历史记录**：保存优化结果，支持查看历史方案
-- **计算过程详解**：完整展示计算公式和代入过程
+- **Complete Profit Calculation Model**: Power generation revenue, coal cost, tax refund benefits, by-product revenue
+- **Constraint Conditions**: Tax refund constraint (low calorific value coal ≥60%), environmental constraint (furnace sulfur ≤4.03t/h), calorific value range
+- **Coal Type Management**: Add, edit, delete coal types
+- **Historical Records**: Save optimization results, view historical solutions
+- **Detailed Calculation Process**: Complete display of formulas and substitution calculations
+- **SQLite Database**: Lightweight local storage
+- **Holographic UI**: Modern holographic light-colored style interface
 
-## 技术栈
+## Tech Stack
 
-- **后端**：FastAPI + PuLP (线性规划求解器) + SQLite
-- **前端**：React + Tailwind CSS
+- **Backend**: FastAPI + PuLP (Linear Programming Solver) + SQLite
+- **Frontend**: React + Tailwind CSS
 
-## 快速开始
+## Quick Start
 
-### 后端启动
+### Backend Setup
 
 ```bash
 cd backend
@@ -25,9 +27,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
-后端服务运行在 http://localhost:8000
+Backend runs at http://localhost:8000
 
-### 前端启动
+### Frontend Setup
 
 ```bash
 cd frontend
@@ -35,19 +37,19 @@ npm install
 npm run dev
 ```
 
-前端服务运行在 http://localhost:3000
+Frontend runs at http://localhost:3000
 
-## 项目结构
+## Project Structure
 
 ```
 coal_blend_system/
 ├── backend/
-│   ├── main.py           # FastAPI入口
-│   ├── solver_core.py    # 线性规划求解器
-│   ├── models.py         # 数据模型
-│   ├── database.py       # SQLite数据库
-│   ├── coal_database.py  # 煤种数据
-│   └── config.py         # 配置参数
+│   ├── main.py           # FastAPI entry point
+│   ├── solver_core.py    # Linear programming solver
+│   ├── models.py         # Data models
+│   ├── database.py       # SQLite database
+│   ├── coal_database.py  # Coal type data
+│   └── config.py         # Configuration parameters
 ├── frontend/
 │   ├── src/
 │   │   ├── App.jsx
@@ -58,25 +60,50 @@ coal_blend_system/
 └── README.md
 ```
 
-## 计算公式
+## Calculation Formulas
 
-### 利润计算
+### Profit Calculation
 ```
-利润 = 发电收入 - 煤炭成本 + 退税收益 + 副产物净收益
-```
-
-### 发电收入
-```
-发电收入 = 发电量 × (1-厂用电率) × 电价 / (1+增值税率)
+Profit = Power Revenue - Coal Cost + Tax Refund + By-product Net Revenue
 ```
 
-### 副产物计算
+### Power Generation Revenue
 ```
-炉灰产量 = 总煤量 × 灰分% × 飞灰占比(90%)
-炉渣产量 = 总煤量 × 灰分% × 炉渣占比(10%)
-石膏产量 = 总煤量 × 硫分% × 钙硫比 × 80/172
+Revenue = Power Generation × (1 - Auxiliary Power Rate) × Electricity Price / (1 + VAT Rate)
 ```
 
-## 许可证
+### By-product Calculation
+```
+Fly Ash Production = Total Coal × Ash % × Fly Ash Ratio (90%)
+Slag Production = Total Coal × Ash % × Slag Ratio (10%)
+Gypsum Production = Total Coal × Sulfur % × Ca/S Ratio × 80/172
+```
+
+## API Documentation
+
+### Coal Management
+- `GET /coals` - Get all coal types
+- `POST /coals` - Create coal type
+- `PUT /coals/{id}` - Update coal type
+- `DELETE /coals/{id}` - Delete coal type
+
+### Optimization
+- `POST /optimize` - Run optimization
+- `POST /history` - Save optimization result
+- `GET /history` - Get history records
+
+### Configuration
+- `GET /config` - Get system configuration
+
+## Constraint Relaxation Mechanism
+
+| Level | Description | Sulfur Multiplier | Tax Refund Ratio |
+|-------|-------------|-------------------|------------------|
+| 0 | Strict | 1.0x | 60% |
+| 1 | Mild | 1.1x | 55% |
+| 2 | Moderate | 1.2x | 50% |
+| 3 | Aggressive | 1.3x | None |
+
+## License
 
 MIT License
